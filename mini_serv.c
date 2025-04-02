@@ -109,12 +109,11 @@ int main(int arc, char **argv) {
 					connfd = accept(sockfd, (struct sockaddr *)&cli, &len);
 					if (connfd < 0)
    						print_error("Fatal error");
-					FD_SET(connfd, &ActiveFDs);
+					MaxFDs = (connfd > MaxFDs) ? connfd : MaxFDs;
 					users[connfd].id = ids ++;
-					// users[connfd].msg = NULL;
+					FD_SET(connfd, &ActiveFDs);
 					sprintf(BufferWrite, "server: client %d just arrived\n", users[connfd].id);
 					broadcast_message(connfd);
-					MaxFDs = (connfd > MaxFDs) ? connfd : MaxFDs;
 				}
 				else
 				{
@@ -133,7 +132,7 @@ int main(int arc, char **argv) {
 					else
 					{
 						BufferRead[ByteRead] = 0;
-						for (int i = 0, j = strlen(users[fd].msg); BufferRead[i]; i++ , j ++)
+						for (int i = 0, j = strlen(users[fd].msg); i < ByteRead  && y < sizeof(users[fd].msg) ; i++ , j ++)
 						{
 							users[fd].msg[j] = BufferRead[i];
 							if (BufferRead[i] == '\n')
@@ -145,7 +144,7 @@ int main(int arc, char **argv) {
 								j = -1;
 							}
 						}
-						fprintf(stderr, "the buffer contain : (%d) (%s)\n", users[fd].id, users[fd].msg);
+						//fprintf(stderr, "the buffer contain : (%d) (%s)\n", users[fd].id, users[fd].msg);
 						
 					}
 				}
